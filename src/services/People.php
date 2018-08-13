@@ -2,6 +2,7 @@
 
 namespace yidas\google\apiHelper\services;
 
+use Exception;
 use Google_Service_PeopleService;
 use Google_Service_PeopleService_Person;
 use Google_Service_PeopleService_Name;
@@ -12,7 +13,11 @@ use Google_Service_PeopleService_PhoneNumber;
  * People Service Helper
  * 
  * @author  Nick Tsai <myintaer@gmail.com>
- * @since   0.1.0 
+ * @since   1.0.0 
+ * @example Exception
+ *  try {} catch (Google_Exception $e) {}
+ *  try {} catch (Google_Service_Exception $e) {}
+ *  
  */
 class People extends \yidas\google\apiHelper\AbstractService
 {
@@ -36,6 +41,43 @@ class People extends \yidas\google\apiHelper\AbstractService
      * @var object The resource name of the contact
      */
     protected static $resourceName;
+
+    /**
+     * Google People Person method attribute map
+     * 
+     * Only needs for non-exist helper method, plural person method or simple attribute
+     * 
+     * @todo Special input attribute overwriting
+     */
+    protected static $personAttrMap = [
+        'setAddresses' => '\Google_Service_PeopleService_Address',
+        'setAgeRange' => '\Google_Service_PeopleService_AgeRangeType',
+        'setAgeRanges' => '\Google_Service_PeopleService_AgeRangeType',
+        'setBiographies' => '\Google_Service_PeopleService_Biography',
+        // 'setBirthdays' => '\Google_Service_PeopleService_Birthday',
+        'setBraggingRights' => '\Google_Service_PeopleService_BraggingRights',
+        'setCoverPhotos' => '\Google_Service_PeopleService_CoverPhoto',
+        'setEmailAddresses' => '\Google_Service_PeopleService_EmailAddress',
+        'setEvents' => '\Google_Service_PeopleService_Event',
+        'setGenders' => '\Google_Service_PeopleService_Gender',
+        'setImClients' => '\Google_Service_PeopleService_ImClient',
+        'setInterests' => '\Google_Service_PeopleService_Interest',
+        'setLocales' => '\Google_Service_PeopleService_Locale',
+        'setMemberships' => '\Google_Service_PeopleService_Membership',
+        'setNicknames' => '\Google_Service_PeopleService_Nickname',
+        'setOccupations' => '\Google_Service_PeopleService_Occupation',
+        'setOrganizations' => '\Google_Service_PeopleService_Organization',
+        'setPhoneNumbers' => '\Google_Service_PeopleService_PhoneNumber',
+        'setPhotos' => '\Google_Service_PeopleService_Photo',
+        'setRelations' => '\Google_Service_PeopleService_Relation',
+        'setRelationshipInterests' => '\Google_Service_PeopleService_RelationshipInterest',
+        'setRelationshipStatuses' => '\Google_Service_PeopleService_RelationshipStatus',
+        'setResidences' => '\Google_Service_PeopleService_Residence',
+        'setSipAddresses' => '\Google_Service_PeopleService_SipAddress',
+        'setSkills' => '\Google_Service_PeopleService_Skill',
+        'setTaglines' => '\Google_Service_PeopleService_Tagline',
+        'setUrls' => '\Google_Service_PeopleService_Url',
+        ];
 
     /**
      * Person's fields
@@ -73,15 +115,27 @@ class People extends \yidas\google\apiHelper\AbstractService
     ];
 
     /**
+     * New a Google_Service_PeopleService_Person
+     *
+     * @return self
+     */
+    public static function newPerson()
+    {
+        self::$person = new Google_Service_PeopleService_Person;       
+
+        return new self;
+    }
+
+    /**
      * Get Google_Service_PeopleService_Person
      *
      * @return Google_Service_PeopleService_Person
      */
-    public function getPerson()
+    public static function getPerson()
     {
         if (!self::$person) {
 
-            self::$person = new Google_Service_PeopleService_Person;
+            self::newPerson();
         }
 
         return self::$person;
@@ -91,11 +145,16 @@ class People extends \yidas\google\apiHelper\AbstractService
      * find a contact to cache
      *
      * @param string $resourceName The resource name of the contact.
+     * @param array $optParams
      * @return self
      */
-    public function findByResource($resourceName)
+    public static function findByResource($resourceName, $optParams=[])
     {
-        self::$person = self::getService()->people->get($resourceName);
+        $optParams = ($optParams) ? $optParams : [
+            'personFields' => self::$personFields,
+        ];
+        
+        self::$person = self::getService()->people->get($resourceName, $optParams);
         
         self::$resourceName = $resourceName;
         
@@ -162,7 +221,14 @@ class People extends \yidas\google\apiHelper\AbstractService
      */
     public static function createContact()
     {
-        return self::getService()->people->createContact(self::getPerson());
+        $person = self::getPerson();
+
+        // New person check
+        if (isset($person->resourceName)) {
+            throw new Exception("You should use newPeron() before create", 500);
+        }
+        
+        return self::getService()->people->createContact($person);
     }
 
     /**
@@ -237,55 +303,40 @@ class People extends \yidas\google\apiHelper\AbstractService
     }
 
     /**
-     * Set EmailAddresses
-     *
-     * @param string|array Simple emailAddress or options
-     * @return self
+     * Alias of __callStatic
      */
-    public static function setEmailAddresses($input='')
+    public function __call(string $name, array $arguments)
     {
-        // Input type process
-        $input = (is_string($input)) ? ['value' => $input] : $input;
-        // Default options
-        $default = [
-            'value' => '',
-        ];
-        // Merged options
-        $input = array_merge($default, $input);
-
-        // New a current object from PeopleService
-        $object = new Google_Service_PeopleService_EmailAddress;
-        // Value
-        $object->setValue($input['value']);
-
-        self::getPerson()->setEmailAddresses($object);
-
-        return new self;
+        return self::__callStatic($name, $arguments);
     }
 
     /**
-     * Set PhoneNumbers
+     * Smart call for setting Person attribute
+     * 
+     * This magic call only for simple People attribute with `setValue()`
      *
-     * @param string|array Simple phoneNumbers or options
-     * @return self
+     * @param string $name
+     * @param array $arguments
+     * @return void
      */
-    public static function setPhoneNumbers($input='')
+    public static function __callStatic(string $name, array $arguments)
     {
-        // Input type process
-        $input = (is_string($input)) ? ['value' => $input] : $input;
-        // Default options
-        $default = [
-            'value' => '',
-        ];
-        // Merged options
-        $input = array_merge($default, $input);
+        // Attribute class mapping
+        $class = isset(self::$personAttrMap[$name]) ? self::$personAttrMap[$name] : '';
+        if (!class_exists($class)) {
+            throw new Exception("Method {$name}() does not exists referred to {$class}.", 500);
+        }
+
+        // Parameter for Attribute class
+        $value = isset($arguments[0]) ? $arguments[0] : null;
 
         // New a current object from PeopleService
-        $object = new Google_Service_PeopleService_PhoneNumber;
-        // Value
-        $object->setValue($input['value']);
-
-        self::getPerson()->setPhoneNumbers($object);
+        $object = new $class;
+        // Set value
+        $object->setValue($value);
+        
+        // Call Person alias method
+        $result = self::getPerson()->$name($object);
 
         return new self;
     }
@@ -305,7 +356,7 @@ class People extends \yidas\google\apiHelper\AbstractService
      * Requests the next page of resources.
      * @return array Data which is part of Google_Service_PeopleService_ListContactGroupsResponse
      */
-    public function listContactGroups($optParams=[])
+    public static function listContactGroups($optParams=[])
     {
         $contactGroup = self::getService()->contactGroups->listContactGroups();
 

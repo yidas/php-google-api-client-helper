@@ -46,6 +46,7 @@ OUTLINE
         - [createContact()](#createcontact)
         - [updateContact()](#updatecontact)
         - [deleteContact()](#deletecontact)
+- [Exceptions](#exceptions)
 - [Reference](#reference)
 ---
 
@@ -228,6 +229,16 @@ $service = \yidas\google\apiHelper\services\People::getService();
 
 ### People
 
+People helper has smart call refered to [Google_Service_PeopleService_Person](https://github.com/google/google-api-php-client-services/blob/master/src/Google/Service/PeopleService/Person.php) methods, which provides easy interface to `setValue()` for a person.
+
+```php
+// Simple setValue() example
+\yidas\google\apiHelper\services\People::newPerson
+    ->setEmailAddresses('myintaer@gmail.com')
+    ->setPhoneNumbers('+886')
+    ->setBiographies("I'm a note");
+```
+
 #### getSimpleContacts()
 
 Get simple contact data with parser
@@ -269,11 +280,14 @@ public static Google_Service_PeopleService_Person createContact()
 
 *Example:*
 ```php
-$person = \yidas\google\apiHelper\services\People::setNames('Nick')
+$person = \yidas\google\apiHelper\services\People::newPerson()
+    ->setNames('Nick')
     ->setEmailAddresses('myintaer@gmail.com')
     ->setPhoneNumbers('+886')
     ->createContact();
 ```
+
+> Resource Name: `$person->resourceName` or `$person['resourceName']`.
 
 #### updateContact()
 
@@ -285,7 +299,7 @@ public static Google_Service_PeopleService_PeopleEmpty updateContact(array $optP
 
 *Example:*
 ```php
-$person = yidas\google\apiHelper\services\People::findByResource($resourceName)
+$person = \yidas\google\apiHelper\services\People::findByResource($resourceName)
     ->setNames('Nick')
     ->setEmailAddresses('myintaer@gmail.com')
     ->setPhoneNumbers('+886')
@@ -310,6 +324,23 @@ You could also use find pattern:
 ```php
 $person = \yidas\google\apiHelper\services\People::findByResource($resourceName)
     ->deleteContact();
+```
+
+---
+
+EXCEPTIONS
+----------
+
+For all Google Exception including Client and Services:
+
+```php
+try {} catch (\Google_Exception $e) {}
+``` 
+
+Otherwise, for Google Services only:
+
+```php
+try {} catch (\Google_Service_Exception $e) {}
 ```
 
 ---
