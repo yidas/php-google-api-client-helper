@@ -10,7 +10,7 @@ use yidas\google\apiHelper\Client;
  * Service Helper
  * 
  * @author  Nick Tsai <myintaer@gmail.com>
- * @since   1.0.0 
+ * @since   1.0.1
  */
 abstract class AbstractService
 {

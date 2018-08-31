@@ -9,7 +9,7 @@ use Exception;
  * Google API Client Helper
  * 
  * @author  Nick Tsai <myintaer@gmail.com>
- * @version 1.0.0
+ * @version 1.0.1
  */
 class Client
 {
