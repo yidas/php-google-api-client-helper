@@ -37,6 +37,9 @@ abstract class AbstractService
     public static function setClient(Google_Client $client)
     {
         Client::setClient($client);
+        
+        // Clear service
+        static::$service = null;
 
         return new static;
     }
