@@ -100,6 +100,9 @@ class Client
      * Verify an access_token. This method will verify the current access_token by Google API, 
      * if one isn't provided.
      *
+     * The Google verification only allow the access_token within the expired time limit, be sure to 
+     * refresh the newest access_token for verifying.
+     *
      * @param string|null $accessToken The token (access_token) that should be verified.
      * @return array|false Returns the token payload as an array if the verification was
      * successful, false otherwise.

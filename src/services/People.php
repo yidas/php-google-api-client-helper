@@ -5,15 +5,15 @@ namespace yidas\google\apiHelper\services;
 use Exception;
 use Google_Service_PeopleService;
 use Google_Service_PeopleService_Person;
+use Google_Service_PeopleService_Date;
 use Google_Service_PeopleService_Name;
-use Google_Service_PeopleService_EmailAddress;
-use Google_Service_PeopleService_PhoneNumber;
 
 /**
  * People Service Helper
  * 
  * @author  Nick Tsai <myintaer@gmail.com>
  * @since   1.0.0 
+ * @see     https://developers.google.com/people/api/rest/v1/people
  * @example Exception
  *  try {} catch (Google_Exception $e) {}
  *  try {} catch (Google_Service_Exception $e) {}
@@ -54,7 +54,7 @@ class People extends \yidas\google\apiHelper\AbstractService
         'setAgeRange' => '\Google_Service_PeopleService_AgeRangeType',
         'setAgeRanges' => '\Google_Service_PeopleService_AgeRangeType',
         'setBiographies' => '\Google_Service_PeopleService_Biography',
-        // 'setBirthdays' => '\Google_Service_PeopleService_Birthday',
+        'setBirthdays' => '\Google_Service_PeopleService_Birthday',
         'setBraggingRights' => '\Google_Service_PeopleService_BraggingRights',
         'setCoverPhotos' => '\Google_Service_PeopleService_CoverPhoto',
         'setEmailAddresses' => '\Google_Service_PeopleService_EmailAddress',
@@ -64,6 +64,7 @@ class People extends \yidas\google\apiHelper\AbstractService
         'setInterests' => '\Google_Service_PeopleService_Interest',
         'setLocales' => '\Google_Service_PeopleService_Locale',
         'setMemberships' => '\Google_Service_PeopleService_Membership',
+        'setNames' => '\Google_Service_PeopleService_Name',
         'setNicknames' => '\Google_Service_PeopleService_Nickname',
         'setOccupations' => '\Google_Service_PeopleService_Occupation',
         'setOrganizations' => '\Google_Service_PeopleService_Organization',
@@ -277,29 +278,48 @@ class People extends \yidas\google\apiHelper\AbstractService
      */
     public static function setNames($input='')
     {
-        // Input type process
-        $input = (is_string($input)) ? ['givenName' => $input] : $input;
-        // Default options
-        $default = [
-            'givenName' => '',
-            'middleName' => '',
-            'familyName' => '',
-        ];
-        // Merged options
-        $input = array_merge($default, $input);
+        // Skip common method parameter
+        if (is_object($input) || is_array($input)) {
+
+            return self::__callStatic($name, [$input]);
+        }
         
-        // New a current object from PeopleService
-        $object = new Google_Service_PeopleService_Name;
+        // Name format helper
+        $gName = new Google_Service_PeopleService_Name;
         // First name
-        $object->setGivenName($input['givenName']);
-        // Middle name
-        $object->setMiddleName($input['middleName']);
-        // Last name
-        $object->setFamilyName($input['familyName']);
+        $gName->setGivenName($input);
 
-        self::getPerson()->setNames($object);
+        return self::__callStatic(__FUNCTION__, [$gName]);
+    }
 
-        return new self;
+    /**
+     * Set Birthdays
+     * 
+     * Suck text recognizing, help by set date.
+     *
+     * @param string|array|object Date text string support
+     * @return self
+     * @example For string type
+     *  setBirthdays('1989-01-30')
+     */
+    public static function setBirthdays($input='')
+    {
+        // Skip common method parameter
+        if (is_object($input) || is_array($input)) {
+
+            return self::__callStatic($name, [$input]);
+        }
+
+        // Date format helper
+        $gDate = new Google_Service_PeopleService_Date;
+        $inputTime = strtotime($input);
+        $gDate->setYear(date("Y", $inputTime));
+        $gDate->setMonth(date("m", $inputTime));
+        $gDate->setDay(date("d", $inputTime));
+
+        $input = ['date' => $gDate];
+
+        return self::__callStatic(__FUNCTION__, [$input]);
     }
 
     /**
@@ -317,7 +337,14 @@ class People extends \yidas\google\apiHelper\AbstractService
      *
      * @param string $name
      * @param array $arguments
+     *  @param object|array|string $arguments[0] First parameter
      * @return void
+     * @example Original Google Service object
+     *  setPhoneNumbers($Google_Service_PeopleService_PhoneNumber)
+     * @example Array helper for first dimension
+     *  setPhoneNumbers(['value'=>'886', 'type'=>'work'])
+     * @example String helper for simple input
+     *  setPhoneNumbers('886')
      */
     public static function __callStatic(string $name, array $arguments)
     {
@@ -327,13 +354,35 @@ class People extends \yidas\google\apiHelper\AbstractService
             throw new Exception("Method {$name}() does not exists referred to {$class}.", 500);
         }
 
-        // Parameter for Attribute class
-        $value = isset($arguments[0]) ? $arguments[0] : null;
+        // Fetch input parameter
+        $input = isset($arguments[0]) ? $arguments[0] : null;
 
-        // New a current object from PeopleService
-        $object = new $class;
-        // Set value
-        $object->setValue($value);
+        $object = null;
+
+        // Data type support
+        if (is_object($input)) {
+            
+            $object = $input;
+        } 
+        elseif (is_array($input)) {
+
+            // New a current object from PeopleService
+            $object = new $class;
+
+            foreach ($input as $key => $value) {
+                // Build method name
+                $method = "set" . ucfirst($key);
+                // Set each input
+                $object->$method($value);
+            }
+        }
+        else {
+
+            // New a current object from PeopleService
+            $object = new $class;
+            // Set value
+            $object->setValue($input);
+        }
         
         // Call Person alias method
         $result = self::getPerson()->$name($object);

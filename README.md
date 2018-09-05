@@ -22,6 +22,8 @@ FEATURES
 
 - *Simple usage for each Service*
 
+This Helper is based on [google-api-php-client](https://github.com/google/google-api-php-client) and [google-api-php-client-services](https://github.com/google/google-api-php-client-services).
+
 ---
 
 OUTLINE
@@ -35,13 +37,14 @@ OUTLINE
         - [Config Array Method](#config-array-method)
         - [Config Chain Method](#config-chain-method)
         - [Encapsulating Method](#encapsulating-method)
-    - [AccessToken Usage](#accessToken-usage)
+    - [AccessToken Usage](#accesstoken-usage)
         - [refreshAccessToken()](#refreshaccesstoken)
         - [verifyAccessToken()](#verifyaccesstoken)
         - [verifyScopes()](#verifyscopes)
     - [Implementation](#implementation)
 - [Google Services](#google-services)
     - [People](#people)
+        - [Attributes](#attributes)
         - [getSimpleContacts()](#getsimplecontacts)
         - [createContact()](#createcontact)
         - [updateContact()](#updatecontact)
@@ -237,6 +240,36 @@ People helper has smart call refered to [Google_Service_PeopleService_Person](ht
     ->setEmailAddresses('myintaer@gmail.com')
     ->setPhoneNumbers('+886')
     ->setBiographies("I'm a note");
+```
+
+#### Attributes
+
+It's easy to set attributes for a person by Helper, which provides three types for input data:
+
+##### 1. Origin Object
+
+Input by original Google Attribute Classes that are not so convenience.
+
+```php
+$gPhoneNumber = new Google_Service_PeopleService_PhoneNumber;
+$gPhoneNumber->setValue('+886');
+\yidas\google\apiHelper\services\People::setPhoneNumbers($gPhoneNumber);
+```
+
+##### 2. Array
+
+Input by array type would map to the API key-value setting.
+
+```php
+\yidas\google\apiHelper\services\People::setPhoneNumbers(['value' => '+886']);
+```
+
+##### 3. String
+
+Input by string type would enable Helper attribute handler which automatically settles value for all attributes.
+
+```php
+\yidas\google\apiHelper\services\People::setPhoneNumbers('+886');
 ```
 
 #### getSimpleContacts()
