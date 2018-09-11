@@ -12,7 +12,7 @@ use Google_Service_PeopleService_Name;
  * People Service Helper
  * 
  * @author  Nick Tsai <myintaer@gmail.com>
- * @since   1.0.0 
+ * @since   1.0.2
  * @see     https://developers.google.com/people/api/rest/v1/people
  * @example Exception
  *  try {} catch (Google_Exception $e) {}
