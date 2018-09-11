@@ -232,6 +232,8 @@ $service = \yidas\google\apiHelper\services\People::getService();
 
 ### People
 
+*API Document: [https://developers.google.com/people/api/rest/](https://developers.google.com/people/api/rest/)*
+
 People helper has smart call refered to [Google_Service_PeopleService_Person](https://github.com/google/google-api-php-client-services/blob/master/src/Google/Service/PeopleService/Person.php) methods, which provides easy interface to `setValue()` for a person.
 
 ```php

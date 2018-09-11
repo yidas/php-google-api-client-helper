@@ -116,13 +116,21 @@ class People extends \yidas\google\apiHelper\AbstractService
     ];
 
     /**
+     * Caches of Google People Attribute Objects
+     */
+    protected static $_attrObjCaches;
+
+    /**
      * New a Google_Service_PeopleService_Person
      *
      * @return self
      */
     public static function newPerson()
     {
-        self::$person = new Google_Service_PeopleService_Person;       
+        self::$person = new Google_Service_PeopleService_Person;    
+        
+        // Clear attributes cache
+        self::$_attrObjCaches = null;
 
         return new self;
     }
@@ -313,6 +321,10 @@ class People extends \yidas\google\apiHelper\AbstractService
         // Date format helper
         $gDate = new Google_Service_PeopleService_Date;
         $inputTime = strtotime($input);
+        // Check
+        if ($inputTime <= 0) {
+            return new self;
+        }
         $gDate->setYear(date("Y", $inputTime));
         $gDate->setMonth(date("m", $inputTime));
         $gDate->setDay(date("d", $inputTime));
@@ -366,8 +378,8 @@ class People extends \yidas\google\apiHelper\AbstractService
         } 
         elseif (is_array($input)) {
 
-            // New a current object from PeopleService
-            $object = new $class;
+            // Get a current object from PeopleService
+            $object = self::getAttrObject($class);;
 
             foreach ($input as $key => $value) {
                 // Build method name
@@ -378,8 +390,8 @@ class People extends \yidas\google\apiHelper\AbstractService
         }
         else {
 
-            // New a current object from PeopleService
-            $object = new $class;
+            // Get a current object from PeopleService
+            $object = self::getAttrObject($class);;
             // Set value
             $object->setValue($input);
         }
@@ -431,5 +443,22 @@ class People extends \yidas\google\apiHelper\AbstractService
 
             throw new Exception("ResourceName is empty", 500);
         }
+    }
+
+    /**
+     * Get People Attribute Object by Class name
+     *
+     * @param string $class
+     * @return object
+     */
+    protected static function getAttrObject($class)
+    {
+        // First new
+        if (!isset(self::$_attrObjCaches[$class])) {
+            
+            self::$_attrObjCaches[$class] = new $class;
+        }
+
+        return self::$_attrObjCaches[$class];
     }
 }
